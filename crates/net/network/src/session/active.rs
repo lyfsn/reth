@@ -566,6 +566,7 @@ impl Future for ActiveSession {
                     break
                 }
             }
+            this.conn.poll_flush_unpin(cx);
 
             // read incoming messages from the wire
             'receive: loop {
