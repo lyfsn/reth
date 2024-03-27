@@ -316,7 +316,7 @@ tower = "0.4"
 tower-http = "0.4"
 
 # p2p
-discv5 = "0.4"
+discv5 = "0.4.1"
 igd-next = "0.14.3"
 
 # rpc
@@ -325,12 +325,12 @@ jsonrpsee-core = "0.20"
 jsonrpsee-types = "0.20"
 
 # crypto
-secp256k1 = { version = "0.27.0", default-features = false, features = [
+secp256k1 = { version = "0.28", default-features = false, features = [
     "global-context",
     "rand-std",
     "recovery",
 ] }
-enr = { version = "=0.10.0", default-features = false, features = ["k256"] }
+enr = { version = "0.10", default-features = false, features = ["k256"] }
 
 # for eip-4844
 c-kzg = "1.0.0"
