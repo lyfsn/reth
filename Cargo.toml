@@ -352,3 +352,4 @@ test-fuzz = "5"
 
 [patch.crates-io]
 discv5 = { git = "https://github.com/sigp/discv5" }
+enr = { git = "https://github.com/danipopes/enr", branch = "advance-decode-buffer" }
