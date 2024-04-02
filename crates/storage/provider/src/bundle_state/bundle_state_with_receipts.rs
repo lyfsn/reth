@@ -18,6 +18,7 @@ use revm::{
     primitives::AccountInfo,
 };
 use std::collections::HashMap;
+use tracing::log::debug;
 
 /// Bundle state of post execution changes and reverts
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
@@ -307,8 +308,10 @@ impl BundleStateWithReceipts {
         TX: DbTxMut + DbTx,
     {
         let (plain_state, reverts) = self.bundle.into_plain_state_and_reverts(is_value_known);
+        debug!("--debug--2.4.1--");
 
         StateReverts(reverts).write_to_db(tx, self.first_block)?;
+        debug!("--debug--2.4.2--");
 
         // write receipts
         let mut bodies_cursor = tx.cursor_read::<tables::BlockBodyIndices>()?;
@@ -338,8 +341,10 @@ impl BundleStateWithReceipts {
                 }
             }
         }
+        debug!("--debug--2.4.3--");
 
         StateChanges(plain_state).write_to_db(tx)?;
+        debug!("--debug--2.4.4--");
 
         Ok(())
     }

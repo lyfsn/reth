@@ -1971,6 +1971,8 @@ impl<TX: DbTxMut + DbTx> HashingWriter for DatabaseProvider<TX> {
         &self,
         accounts: impl IntoIterator<Item = (Address, Option<Account>)>,
     ) -> ProviderResult<BTreeMap<B256, Option<Account>>> {
+        debug!("--debug--1.0.1.1.1--");
+
         let mut hashed_accounts_cursor = self.tx.cursor_write::<tables::HashedAccounts>()?;
         let hashed_accounts =
             accounts.into_iter().map(|(ad, ac)| (keccak256(ad), ac)).collect::<BTreeMap<_, _>>();
@@ -1981,6 +1983,8 @@ impl<TX: DbTxMut + DbTx> HashingWriter for DatabaseProvider<TX> {
                 hashed_accounts_cursor.delete_current()?;
             }
         }
+        debug!("--debug--1.0.1.1.2--");
+
         Ok(hashed_accounts)
     }
 

@@ -4,6 +4,7 @@ use crate::{
 use alloy_primitives::keccak256;
 use alloy_rlp::{RlpDecodable, RlpEncodable};
 use revm_primitives::AccountInfo;
+use std::fmt::Debug;
 
 /// An Ethereum account as represented in the trie.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default, RlpEncodable, RlpDecodable)]
@@ -53,7 +54,11 @@ impl From<GenesisAccount> for TrieAccount {
                 )
             })
             .unwrap_or(EMPTY_ROOT_HASH);
-
+        if let Some(code) = &account.code {
+            let code_hash = account.code.as_ref().map_or(KECCAK_EMPTY, |code| keccak256(code.clone()));
+            println!("--debug----------------------: nonce: {:?}, balance: {:?}, storage_root: {:?}, code_hash: {:?}",
+                     account.nonce.unwrap_or_default(), account.balance, storage_root, code_hash);
+        }
         Self {
             nonce: account.nonce.unwrap_or_default(),
             balance: account.balance,

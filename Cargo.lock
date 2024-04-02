@@ -6126,6 +6126,7 @@ dependencies = [
  "humantime",
  "hyper",
  "jsonrpsee",
+ "log",
  "metrics",
  "metrics-exporter-prometheus",
  "metrics-process",

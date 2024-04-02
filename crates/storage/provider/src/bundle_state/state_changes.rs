@@ -7,6 +7,7 @@ use reth_db::{
 use reth_interfaces::db::DatabaseError;
 use reth_primitives::{revm::compat::into_reth_acc, Bytecode, StorageEntry, U256};
 use revm::db::states::{PlainStorageChangeset, StateChangeset};
+use tracing::log::debug;
 
 /// A change to the state of the world.
 #[derive(Debug, Default)]
@@ -26,6 +27,7 @@ impl StateChanges {
         self.0.accounts.par_sort_by_key(|a| a.0);
         self.0.storage.par_sort_by_key(|a| a.address);
         self.0.contracts.par_sort_by_key(|a| a.0);
+        debug!("--debug--2.4.3.1--");
 
         // Write new account state
         tracing::trace!(target: "provider::bundle_state", len = self.0.accounts.len(), "Writing new account state");
@@ -40,6 +42,7 @@ impl StateChanges {
                 accounts_cursor.delete_current()?;
             }
         }
+        debug!("--debug--2.4.3.2--");
 
         // Write bytecode
         tracing::trace!(target: "provider::bundle_state", len = self.0.contracts.len(), "Writing bytecodes");
@@ -47,6 +50,7 @@ impl StateChanges {
         for (hash, bytecode) in self.0.contracts.into_iter() {
             bytecodes_cursor.upsert(hash, Bytecode(bytecode))?;
         }
+        debug!("--debug--2.4.3.3--");
 
         // Write new storage state and wipe storage if needed.
         tracing::trace!(target: "provider::bundle_state", len = self.0.storage.len(), "Writing new storage state");
@@ -77,6 +81,8 @@ impl StateChanges {
                 }
             }
         }
+        debug!("--debug--2.4.3.4--");
+
         Ok(())
     }
 }

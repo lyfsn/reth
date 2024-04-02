@@ -20,7 +20,7 @@ use std::{
     collections::{BTreeMap, HashMap},
     sync::Arc,
 };
-use tracing::debug;
+use log::debug;
 
 /// Database initialization error type.
 #[derive(Debug, thiserror::Error, PartialEq, Eq, Clone)]
@@ -48,10 +48,17 @@ impl From<DatabaseError> for InitDatabaseError {
 
 /// Write the genesis block if it has not already been written
 pub fn init_genesis<DB: Database>(factory: ProviderFactory<DB>) -> Result<B256, InitDatabaseError> {
+    debug!("--debug--0--");
+
     let chain = factory.chain_spec();
+    debug!("--debug--0.1--");
 
     let genesis = chain.genesis();
+    debug!("--debug--0.2--");
+
     let hash = chain.genesis_hash();
+    // print genesis and hash
+    debug!("--debug--1--Genesis hash: {:?}", hash);
 
     // Check if we already have the genesis header or if we have the wrong one.
     match factory.block_hash(0) {
@@ -74,13 +81,23 @@ pub fn init_genesis<DB: Database>(factory: ProviderFactory<DB>) -> Result<B256, 
 
     // use transaction to insert genesis header
     let provider_rw = factory.provider_rw()?;
+
+    debug!("--debug--1.0.1--");
+
     insert_genesis_hashes(&provider_rw, genesis)?;
+
+    debug!("--debug--1.0.2--");
+
     insert_genesis_history(&provider_rw, genesis)?;
 
     // Insert header
     let tx = provider_rw.into_tx();
     let static_file_provider = factory.static_file_provider();
+    debug!("--debug--1.1--");
+
     insert_genesis_header::<DB>(&tx, &static_file_provider, chain.clone())?;
+
+    debug!("--debug--2--");
 
     insert_genesis_state::<DB>(&tx, genesis)?;
 
@@ -88,6 +105,7 @@ pub fn init_genesis<DB: Database>(factory: ProviderFactory<DB>) -> Result<B256, 
     for stage in StageId::ALL.iter() {
         tx.put::<tables::StageCheckpoints>(stage.to_string(), Default::default())?;
     }
+    debug!("--debug--3--");
 
     tx.commit()?;
     static_file_provider.commit()?;
@@ -100,7 +118,11 @@ pub fn insert_genesis_state<DB: Database>(
     tx: &<DB as Database>::TXMut,
     genesis: &reth_primitives::Genesis,
 ) -> ProviderResult<()> {
+    debug!("--debug--2.1--");
+
     let capacity = genesis.alloc.len();
+    debug!("--debug--2.2-- capacity: {:?}", capacity);
+
     let mut state_init: BundleStateInit = HashMap::with_capacity(capacity);
     let mut reverts_init = HashMap::with_capacity(capacity);
     let mut contracts: HashMap<B256, Bytecode> = HashMap::with_capacity(capacity);
@@ -147,6 +169,8 @@ pub fn insert_genesis_state<DB: Database>(
             ),
         );
     }
+    debug!("--debug--2.3--");
+
     let all_reverts_init: RevertsInit = HashMap::from([(0, reverts_init)]);
 
     let bundle = BundleStateWithReceipts::new_init(
@@ -156,8 +180,10 @@ pub fn insert_genesis_state<DB: Database>(
         Receipts::new(),
         0,
     );
+    debug!("--debug--2.4--");
 
     bundle.write_to_storage(tx, None, OriginalValuesKnown::Yes)?;
+    debug!("--debug--2.5--");
 
     Ok(())
 }
@@ -168,12 +194,15 @@ pub fn insert_genesis_hashes<DB: Database>(
     genesis: &reth_primitives::Genesis,
 ) -> ProviderResult<()> {
     // insert and hash accounts to hashing table
+    debug!("--debug--1.0.1.1--");
+
     let alloc_accounts = genesis
         .alloc
         .clone()
         .into_iter()
         .map(|(addr, account)| (addr, Some(Account::from_genesis_account(account))));
     provider.insert_account_for_hashing(alloc_accounts)?;
+    debug!("--debug--1.0.1.2--");
 
     let alloc_storage = genesis.alloc.clone().into_iter().filter_map(|(addr, account)| {
         // only return Some if there is storage
@@ -185,6 +214,7 @@ pub fn insert_genesis_hashes<DB: Database>(
         })
     });
     provider.insert_storage_for_hashing(alloc_storage)?;
+    debug!("--debug--1.0.1.3--");
 
     Ok(())
 }

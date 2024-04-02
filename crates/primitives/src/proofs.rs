@@ -226,6 +226,7 @@ pub fn storage_root_unsorted(storage: impl IntoIterator<Item = (B256, U256)>) ->
 pub fn storage_root(storage: impl IntoIterator<Item = (B256, U256)>) -> B256 {
     let mut hb = HashBuilder::default();
     for (hashed_slot, value) in storage {
+        println!("Key: {:?}, Value: {:?}", hashed_slot, alloy_rlp::encode_fixed_size(&value).as_ref());
         hb.add_leaf(Nibbles::unpack(hashed_slot), alloy_rlp::encode_fixed_size(&value).as_ref());
     }
     hb.root()
